@@ -8,16 +8,16 @@ namespace ConfluentNullRef
 {
     public static class ProducerFactory
     {
-        public static IProducer<Guid, MessageTypes.LogMessage> Create(ISchemaRegistryClient schemaClient)
+        public static IProducer<Guid, T> Create<T>(ISchemaRegistryClient schemaClient)
         {
             var producerConfig = new ProducerConfig()
             {
                 BootstrapServers = "localhost:9092",
             };
 
-            var builder = new ProducerBuilder<Guid, MessageTypes.LogMessage>(producerConfig)
+            var builder = new ProducerBuilder<Guid, T>(producerConfig)
                 .SetKeySerializer(new GuidSerializer())
-                .SetValueSerializer(new AvroSerializer<MessageTypes.LogMessage>(schemaClient).AsSyncOverAsync());
+                .SetValueSerializer(new AvroSerializer<T>(schemaClient).AsSyncOverAsync());
 
             return builder.Build();
         }

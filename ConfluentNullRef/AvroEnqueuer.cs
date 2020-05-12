@@ -5,20 +5,20 @@ using Confluent.SchemaRegistry;
 
 namespace ConfluentNullRef
 {
-    public class AvroEnqueuer:IDisposable
+    public class AvroEnqueuer<T> : IDisposable
     {
         private ISchemaRegistryClient schemaClient;
-        private IProducer<Guid, MessageTypes.LogMessage> producer;
+        private IProducer<Guid, T> producer;
 
         public void Open()
         {
             schemaClient = SchemaClientFactory.Create();
-            producer = ProducerFactory.Create(schemaClient);
+            producer = ProducerFactory.Create<T>(schemaClient);
         }
 
-        public async Task EnqueueAsync(MessageTypes.LogMessage msg)
+        public async Task EnqueueAsync(T msg)
         {
-            var dr = await producer.ProduceAsync("test-topic", new Message<Guid, MessageTypes.LogMessage>()
+            var dr = await producer.ProduceAsync("test-topic", new Message<Guid, T>()
             {
                 Key = Guid.NewGuid(),
                 Value = msg
