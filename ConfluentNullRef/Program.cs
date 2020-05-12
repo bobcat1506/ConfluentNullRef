@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Confluent.Kafka.Admin;
+using Confluent.SchemaRegistry;
 using io.confluent.examples.clients.basicavro;
 
 namespace ConfluentNullRef
@@ -17,28 +18,34 @@ namespace ConfluentNullRef
 
             using var schemaClient = SchemaClientFactory.Create();
 
-            // var schema = File.ReadAllText("ConfluentNullRef/LogMessage.avsc");
-            // var id = await schemaClient.RegisterSchemaAsync("LogMessage", schema);
+            var schemaText = File.ReadAllText("ConfluentNullRef/LogMessage.avsc");
+            var schema = new Schema(schemaText, SchemaType.Avro);
 
-            // using var enqueuer = new AvroEnqueuer<MessageTypes.LogMessage>();
-            // await enqueuer.EnqueueAsync(new MessageTypes.LogMessage()
-            // {
-            //     Message = "Hello",
-            //     IP = "127.0.0.1",                     
-            //     Severity = MessageTypes.LogLevel.Info,
-            //     Tags = new Dictionary<string, string> {{ "key", "value"}}
-            // });
+            var id = await schemaClient.RegisterSchemaAsync("LogMessage", schema);
 
-            // simpler example, per mhowlett's suggestion
-            var schema = File.ReadAllText("ConfluentNullRef/Payment.avsc");
-            var id = await schemaClient.RegisterSchemaAsync("Payment", schema);
-
-            using var enqueuer = new AvroEnqueuer<Payment>();
-            await enqueuer.EnqueueAsync(new Payment()
+            using var enqueuer = new AvroEnqueuer<MessageTypes.LogMessage>();
+            enqueuer.Open();
+            
+            await enqueuer.EnqueueAsync(new MessageTypes.LogMessage()
             {
-                id = Guid.NewGuid().ToString(),
-                amount = 56.34
+                Message = "Hello",
+                IP = "127.0.0.1",                     
+                Severity = MessageTypes.LogLevel.Info,
+                Tags = new Dictionary<string, string> {{ "key", "value"}}
             });
+
+            // // simpler example, per mhowlett's suggestion
+            // var schema = File.ReadAllText("ConfluentNullRef/Payment.avsc");
+            // var id = await schemaClient.RegisterSchemaAsync("Payment", schema);
+
+            // using var enqueuer = new AvroEnqueuer<Payment>();
+            // enqueuer.Open();
+
+            // await enqueuer.EnqueueAsync(new Payment()
+            // {
+            //     id = Guid.NewGuid().ToString(),
+            //     amount = 56.34
+            // });
         }
     }
 }

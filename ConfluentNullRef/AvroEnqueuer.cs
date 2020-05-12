@@ -18,6 +18,11 @@ namespace ConfluentNullRef
 
         public async Task EnqueueAsync(T msg)
         {
+            if (producer == null)
+            {
+                throw new InvalidOperationException("instance not opened");
+            }
+
             var dr = await producer.ProduceAsync("test-topic", new Message<Guid, T>()
             {
                 Key = Guid.NewGuid(),
