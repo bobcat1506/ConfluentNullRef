@@ -12,7 +12,7 @@ namespace ConfluentNullRef
 
         public void Open()
         {
-            schemaClient = SchemaClientFactory.Create();
+            // schemaClient = SchemaClientFactory.Create();
             producer = ProducerFactory.Create<T>(schemaClient);
         }
 
